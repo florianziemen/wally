@@ -86,6 +86,34 @@ describe('store', () => {
     assert.equal(read(KEYS.settings).group, null);
   });
 
+  it('stores timing with a group and applies it on select', () => {
+    const { store, read } = setup({
+      [KEYS.groups]: [{ id: 'old', name: 'Old', exercises: ['a', 'b'] }],
+    });
+    store.updateSettings({ work: 45, rest: 15, sets: 2, setRest: 90 });
+    store.saveGroup(null, 'Core', ['Plank: hold', 'Crunch']);
+    const id = store.state.settings.group;
+    assert.deepEqual(read(KEYS.groups)[1].timing, { work: 45, rest: 15, sets: 2, setRest: 90 });
+
+    store.updateSettings({ work: 20, rest: 0, sets: 1, setRest: 0, rounds: 7 });
+    store.selectGroup('old');
+    const s = store.state.settings;
+    assert.deepEqual([s.work, s.rest, s.sets, s.setRest, s.rounds], [20, 0, 1, 0, 2]);
+
+    store.selectGroup(id);
+    const t = store.state.settings;
+    assert.deepEqual([t.work, t.rest, t.sets, t.setRest, t.rounds], [45, 15, 2, 90, 2]);
+
+    const target = setup();
+    target.store.restore(store.backup());
+    assert.deepEqual(target.store.state.groups.find((g) => g.id === id)?.timing, {
+      work: 45,
+      rest: 15,
+      sets: 2,
+      setRest: 90,
+    });
+  });
+
   it('adds and deletes sessions, reporting failed saves', () => {
     const { store, backend, read } = setup();
     const s = { id: 'a', at: '2026-10-01T10:00:00Z', work: 30, rest: 0, rounds: 4, planned: 4 };

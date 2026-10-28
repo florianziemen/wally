@@ -8,7 +8,8 @@ has no tracking and keeps your data on your device.
 ## Features
 
 - Work, rest, rounds and sets, with an optional longer break between sets
-- Exercise groups: name each work interval (e.g. “Squats”, “Push-ups”)
+- Exercise groups: name each work interval (e.g. “Squats”, “Push-ups”), add
+  a short description, and keep the group’s own work, rest and set timing
 - Beeps and vibration at each phase change, a countdown in the last
   seconds and a halfway signal; music from other apps keeps playing
 - Keeps the screen on during a workout

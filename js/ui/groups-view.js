@@ -1,6 +1,6 @@
 // Exercise group chips, description and editor.
 
-import { groupNote, parseGroupInput } from '../groups.js';
+import { exerciseNames, groupNote, parseGroupInput, timingOf, timingText } from '../groups.js';
 import { byId, el, twoTap } from './dom.js';
 
 /** @param {import('../store.js').Store} store */
@@ -12,6 +12,7 @@ export function initGroupsView(store) {
   const exInput = /** @type {HTMLTextAreaElement} */ (byId('g-ex'));
   const delBtn = /** @type {HTMLButtonElement} */ (byId('g-del'));
   const msg = byId('g-msg');
+  const timingEl = byId('g-timing');
 
   /** @type {string|null} id of the group being edited, null for a new one */
   let editing = null;
@@ -69,6 +70,7 @@ export function initGroupsView(store) {
 
   function render() {
     const { groups, settings } = store.state;
+    timingEl.textContent = `Saves the current timing: ${timingText(timingOf(settings))}.`;
     chips.replaceChildren(
       chip('No group', null, settings.group),
       ...groups.map((g) => chip(g.name, g.id, settings.group)),
@@ -83,7 +85,7 @@ export function initGroupsView(store) {
     const note = groupNote(group, settings.rounds, settings.sets);
     const edit = el('button', { className: 'linkbtn', text: 'Edit group' });
     edit.addEventListener('click', () => openEditor(group));
-    desc.replaceChildren(el('span', { text: `${group.exercises.join(', ')}. ${note} ` }), edit);
+    desc.replaceChildren(el('span', { text: `${exerciseNames(group).join(', ')}. ${note} ` }), edit);
   }
 
   store.subscribe(render);

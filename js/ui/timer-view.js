@@ -6,7 +6,7 @@ import { createSession } from '../log.js';
 import { cheer, pepTalk } from '../motivation.js';
 import { activeSeason } from '../seasons.js';
 import { Workout, buildPhases, nextLine, phaseTitle, progressLine } from '../workout.js';
-import { byId, showWally, twoTap } from './dom.js';
+import { byId, el, showWally, twoTap } from './dom.js';
 
 const TICK_MS = 100;
 
@@ -18,6 +18,7 @@ const TICK_MS = 100;
 export function initTimerView(store, feedback, now = () => performance.now()) {
   const overlay = byId('timer');
   const phaseEl = byId('t-phase');
+  const descEl = byId('t-desc');
   const countEl = byId('t-count');
   const nextEl = byId('t-next');
   const roundEl = byId('t-round');
@@ -95,10 +96,14 @@ export function initTimerView(store, feedback, now = () => performance.now()) {
     const sec = Math.ceil(workout.remaining(t) / 1000);
     setMode(phase.type + (workout.paused ? ' paused' : ''));
     phaseEl.textContent = workout.paused ? 'Paused' : phaseTitle(phase);
+    descEl.textContent = phase.desc ?? '';
+    descEl.hidden = workout.paused || !phase.desc;
     countEl.textContent = sec >= 60 ? clock(sec) : String(sec);
     roundEl.textContent = progressLine(phase, plan);
     elapsedEl.textContent = clock(workout.elapsed(t) / 1000);
-    nextEl.textContent = nextLine(workout.next);
+    const next = workout.next;
+    nextEl.replaceChildren(nextLine(next));
+    if (next?.desc) nextEl.append(el('span', { className: 't-sub', text: next.desc }));
     bar.style.width = `${workout.progress(t) * 100}%`;
     totalBar.style.width = `${workout.overall(t) * 100}%`;
   }
@@ -130,6 +135,7 @@ export function initTimerView(store, feedback, now = () => performance.now()) {
     totalBar.style.width = '100%';
     roundEl.textContent = '';
     elapsedEl.textContent = '';
+    descEl.hidden = true;
     countEl.textContent = String(completed);
     endBtn.hidden = true;
     mainBtn.textContent = 'Close';

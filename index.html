@@ -170,8 +170,14 @@
         <div class="editor" id="g-editor" hidden>
           <label for="g-name">Group name</label>
           <input type="text" id="g-name" placeholder="Legs and core" maxlength="40" autocomplete="off" />
-          <label for="g-ex">Exercises, one per line, in the order you’ll do them</label>
-          <textarea id="g-ex" placeholder="Squats&#10;Push-ups&#10;Mountain climbers&#10;Plank"></textarea>
+          <label for="g-ex"
+            >Exercises, one per line, in the order you’ll do them. Add a description after a colon.</label
+          >
+          <textarea
+            id="g-ex"
+            placeholder="Squats: feet shoulder-width apart&#10;Push-ups&#10;Mountain climbers&#10;Plank: elbows under shoulders"
+          ></textarea>
+          <p class="g-timing" id="g-timing"></p>
           <div class="btns">
             <button class="btn primary" id="g-save">Save group</button
             ><button class="btn" id="g-cancel">Cancel</button
@@ -238,6 +244,7 @@
       <div class="t-top"><span id="t-round"></span><span id="t-elapsed"></span></div>
       <div class="t-mid">
         <div class="t-phase" id="t-phase">Get ready</div>
+        <div class="t-desc" id="t-desc" hidden></div>
         <div class="t-count" id="t-count">5</div>
         <div class="t-next" id="t-next"></div>
         <div class="wallaby" id="wb-done" hidden>

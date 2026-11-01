@@ -2,7 +2,16 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 
 import { breakLength, clock, count, long, short } from '../js/format.js';
-import { cleanGroup, exerciseFor, groupNote, parseGroupInput, sanitizeGroups } from '../js/groups.js';
+import {
+  cleanGroup,
+  exerciseFor,
+  exerciseNames,
+  groupNote,
+  parseGroupInput,
+  sanitizeGroups,
+  splitExercise,
+  timingText,
+} from '../js/groups.js';
 import {
   createSession,
   describeSession,
@@ -94,9 +103,56 @@ describe('groups', () => {
   it('wraps exercises across rounds', () => {
     const g = group(3);
     assert.deepEqual(
-      [1, 2, 3, 4].map((r) => exerciseFor(g, r)),
+      [1, 2, 3, 4].map((r) => exerciseFor(g, r).name),
       ['E1', 'E2', 'E3', 'E1'],
     );
+  });
+
+  it('splits exercises into name and description', () => {
+    assert.deepEqual(splitExercise(' Plank '), { name: 'Plank', desc: '' });
+    assert.deepEqual(splitExercise('Plank : elbows under shoulders '), {
+      name: 'Plank',
+      desc: 'elbows under shoulders',
+    });
+    assert.deepEqual(splitExercise('Run: 2:00 pace'), { name: 'Run', desc: '2:00 pace' });
+    assert.deepEqual(splitExercise('Plank:'), { name: 'Plank', desc: '' });
+    const g = { id: 'g', name: 'G', exercises: ['Plank: hold', 'Squats'] };
+    assert.deepEqual(exerciseFor(g, 1), { name: 'Plank', desc: 'hold' });
+    assert.deepEqual(exerciseNames(g), ['Plank', 'Squats']);
+  });
+
+  it('cleans names and descriptions separately', () => {
+    const g = cleanGroup({
+      name: 'x',
+      exercises: [`${'n'.repeat(50)}:${'d'.repeat(100)}`, 'Plank :  ', ': no name', ' A:b '],
+    });
+    assert.deepEqual(g.exercises, [`${'n'.repeat(40)}: ${'d'.repeat(80)}`, 'Plank', 'A: b']);
+    assert.deepEqual(parseGroupInput('x', 'Plank:hold\nSquats').exercises, ['Plank: hold', 'Squats']);
+  });
+
+  it('keeps valid timing and drops broken timing', () => {
+    const base = { name: 'x', exercises: ['a'] };
+    assert.equal('timing' in cleanGroup(base), false);
+    assert.equal('timing' in cleanGroup({ ...base, timing: { work: 30 } }), false);
+    assert.equal('timing' in cleanGroup({ ...base, timing: 'fast' }), false);
+    assert.deepEqual(
+      cleanGroup({ ...base, timing: { work: 999, rest: 10.4, sets: 0, setRest: 60, x: 1 } }).timing,
+      {
+        work: 300,
+        rest: 10,
+        sets: 1,
+        setRest: 60,
+      },
+    );
+  });
+
+  it('describes timing', () => {
+    assert.equal(timingText({ work: 30, rest: 15, sets: 1, setRest: 60 }), '30s work, 15s rest');
+    assert.equal(
+      timingText({ work: 60, rest: 0, sets: 2, setRest: 90 }),
+      '1m work, no rest, 2 sets, 1:30 break',
+    );
+    assert.equal(timingText({ work: 20, rest: 10, sets: 3, setRest: 0 }), '20s work, 10s rest, 3 sets');
   });
 
   it('explains how the list maps onto rounds', () => {
@@ -284,6 +340,18 @@ describe('workout plan', () => {
     assert.deepEqual(
       p.filter((x) => x.type === 'work').map((x) => x.label),
       ['E1', 'E2', 'E1', 'E1', 'E2', 'E1'],
+    );
+  });
+
+  it('puts exercise descriptions on work phases', () => {
+    const g = { id: 'g', name: 'G', exercises: ['Plank: hold', 'Squats'] };
+    const work = buildPhases(settings({ rest: 0, rounds: 2 }), g).filter((x) => x.type === 'work');
+    assert.deepEqual(
+      work.map((x) => [x.label, x.desc]),
+      [
+        ['Plank', 'hold'],
+        ['Squats', undefined],
+      ],
     );
   });
 

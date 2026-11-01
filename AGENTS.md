@@ -123,7 +123,11 @@ hiit-settings-v1: object
     Limits: LIMITS in js/settings.js. Defaults apply per field when invalid.
 
 hiit-groups-v1: array of
-    { id: string, name: string (max 40), exercises: string[] (1..30, each max 40) }
+    { id: string, name: string (max 40), exercises: string[] (1..30),
+      timing?: { work, rest, sets, setRest } (same limits as settings) }
+    Each exercise is "Name" or "Name: description", split at the first ':'
+    (splitExercise); name max 40, description max 80. Groups saved before
+    timing existed have no timing and leave the settings alone on select.
     cleanGroup() validates a group.
 
 hiit-log-v1: array of workout sessions
@@ -158,17 +162,21 @@ to read every older version.
 
 Settings and groups
 
-- Selecting a group sets rounds to its number of exercises. Work intervals
-  are labeled `exercises[(round - 1) % length]`, starting over in each set.
-- The group editor uses one exercise per line in a textarea. Deleting a
-  group takes two taps.
+- Selecting a group sets rounds to its number of exercises and applies its
+  timing (work, rest, sets, setRest). Work intervals are labeled with the
+  name of `exercises[(round - 1) % length]`, starting over in each set.
+- The group editor uses one exercise per line in a textarea, with an
+  optional description after a colon. Saving stores the current timing
+  from the steppers (shown in the editor). Deleting a group takes two taps.
 
 Timer
 
 - `buildPhases()` creates a flat list: prep (5s), then for each set the
   work and rest phases, with a "break" phase between sets. If setRest is 0,
   a normal rest phase is used between sets instead, when rest > 0.
-- Phase objects: `{ type: 'prep'|'work'|'rest'|'break', dur, set, round, label? }`
+- Phase objects: `{ type: 'prep'|'work'|'rest'|'break', dur, set, round, label?, desc? }`.
+  The description shows smaller under the exercise name (`#t-desc`) and
+  under the name in the “Then …” preview.
 - `Workout` timing uses timestamps (`phaseEnd`), not tick counts. The view
   calls `tick(now)` every 100ms; it catches up across several phases if the
   page was in the background. Pausing stores the remaining milliseconds,

@@ -1,7 +1,7 @@
 // App state: settings, groups and the workout log. The single place that
 // reads and writes storage. Views call these methods and re-render on change.
 
-import { newId, sanitizeGroups } from './groups.js';
+import { newId, sanitizeGroups, timingOf } from './groups.js';
 import { mergeById, parseBackup, sanitizeLog, toBackup } from './log.js';
 import { clampField, sanitizeSettings } from './settings.js';
 
@@ -42,10 +42,10 @@ export function createStore(storage) {
     return state.groups.find((g) => g.id === id) ?? null;
   }
 
-  /** Select a group and match rounds to its length. @param {string|null} id */
+  /** Select a group, apply its timing and match rounds to its length. @param {string|null} id */
   function applyGroup(id) {
     const g = findGroup(id);
-    const next = { ...state.settings, group: g ? g.id : null };
+    const next = { ...state.settings, ...g?.timing, group: g ? g.id : null };
     if (g) next.rounds = clampField('rounds', g.exercises.length);
     commitSettings(next);
   }
@@ -76,14 +76,19 @@ export function createStore(storage) {
     },
 
     /**
-     * Create or update a group, then select it.
+     * Create or update a group with the current timing, then select it.
      * @param {string|null} id  null creates a new group
      * @param {string} name
      * @param {string[]} exercises
      */
     saveGroup(id, name, exercises) {
       const existing = findGroup(id);
-      const group = { id: existing ? existing.id : newId(), name, exercises };
+      const group = {
+        id: existing ? existing.id : newId(),
+        name,
+        exercises,
+        timing: timingOf(state.settings),
+      };
       state.groups = existing
         ? state.groups.map((g) => (g.id === group.id ? group : g))
         : [...state.groups, group];

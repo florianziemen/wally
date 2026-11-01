@@ -12,6 +12,7 @@ import { PREP_SECONDS } from './settings.js';
  * @property {number} set    1-based
  * @property {number} round  1-based; 0 for prep
  * @property {string|null} [label]  exercise name for work phases
+ * @property {string} [desc]  exercise description, only when the group gives one
  */
 
 /** @type {Record<PhaseType, string>} */
@@ -29,8 +30,11 @@ export function buildPhases(s, group) {
   const phases = [{ type: 'prep', dur: PREP_SECONDS, set: 1, round: 0 }];
   for (let set = 1; set <= s.sets; set++) {
     for (let round = 1; round <= s.rounds; round++) {
-      const label = group ? exerciseFor(group, round) : null;
-      phases.push({ type: 'work', dur: s.work, set, round, label });
+      const ex = group ? exerciseFor(group, round) : null;
+      /** @type {Phase} */
+      const work = { type: 'work', dur: s.work, set, round, label: ex ? ex.name : null };
+      if (ex?.desc) work.desc = ex.desc;
+      phases.push(work);
       if (round < s.rounds && s.rest > 0) phases.push({ type: 'rest', dur: s.rest, set, round });
     }
     if (set < s.sets) {

@@ -1,5 +1,5 @@
-// Wally vs the zombies. Every full week of daily exercise (Monday to Sunday)
-// earns Wally one piece of gear; every past day without exercise costs the
+// Wally vs the zombies. Every seven days in a row with exercise earn Wally
+// one piece of gear; every past day without exercise costs the
 // newest one. A missed day with nothing left to lose turns him into a zombie,
 // and the next workout cures him. Inspired by Zombicide.
 
@@ -25,7 +25,7 @@ import { CALENDAR_WEEKS, addDays, dayKey, parseDayKey, totalsByDay } from './sta
  * @property {FightEvent|null} last  most recent change
  */
 
-/** Gear in the order it is found. One per full week, so all of it takes the whole calendar. */
+/** Gear in the order it is found. One per 7-day run, so all of it takes the whole calendar. */
 export const TRAITS = Object.freeze([
   { emoji: '🍳', name: 'a frying pan' },
   { emoji: '🏏', name: 'a cricket bat' },
@@ -36,6 +36,9 @@ export const TRAITS = Object.freeze([
 ]);
 
 export const MAX_LEVEL = TRAITS.length;
+
+/** Days in a row with exercise that earn the next piece of gear. */
+export const RUN_DAYS = 7;
 
 /**
  * Replay the log day by day, from the first workout to today. Today only
@@ -60,8 +63,8 @@ export function fightState(log, now) {
         state.zombie = false;
         state.last = { kind: 'cure', key };
       }
-      // Sunday that closes a week with exercise every day.
-      if (d.getDay() === 0 && run >= 7 && state.traits.length < MAX_LEVEL) {
+      // Every RUN_DAYS days in a row, whichever weekday they start on.
+      if (run % RUN_DAYS === 0 && state.traits.length < MAX_LEVEL) {
         const trait = TRAITS[state.traits.length];
         state.traits.push(trait);
         state.last = { kind: 'gain', key, trait };
@@ -91,7 +94,7 @@ export function fightLine(state) {
   if (level === MAX_LEVEL) {
     return `Fully armed after ${CALENDAR_WEEKS} weeks! Every day without exercise costs one piece of gear.`;
   }
-  const next = `Exercise every day from Monday to Sunday to find new gear.`;
+  const next = `Exercise ${RUN_DAYS} days in a row to find new gear.`;
   if (level) return `Level ${level} of ${MAX_LEVEL}. ${next}`;
   return `Wally is empty-pawed: one day without exercise and he turns. ${next}`;
 }

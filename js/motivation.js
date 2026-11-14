@@ -136,9 +136,9 @@ export const PERSONAL_GREETINGS = Object.freeze({
     (c) => `Workout number ${c.thisWeek + 1} this week? Let’s go.`,
   ],
   dropped: [
-    (c) => `I dropped ${c.trait?.name} yesterday. A full week wins it back!`,
+    (c) => `I dropped ${c.trait?.name} yesterday. Seven days in a row wins it back!`,
     (c) => `A zombie got ${c.trait?.name} ${c.trait?.emoji} yesterday. Let’s not lose more.`,
-    (c) => `Lost ${c.trait?.name} yesterday. Every day this week and it’s mine again.`,
+    (c) => `Lost ${c.trait?.name} yesterday. A week without a break and it’s mine again.`,
   ],
   emptyPawed: [
     'Zombies everywhere and I’ve got nothing. Hop to it today or I turn!',
@@ -195,9 +195,9 @@ export const PERSONAL_CHEERS = Object.freeze({
     'Zombie, wannabe, wallaby. Back to the real thing. Thanks, mate!',
   ],
   gain: [
-    (c) => `A whole week, every single day! I found ${c.trait?.name} ${c.trait?.emoji}`,
+    (c) => `A whole week without a break! I found ${c.trait?.name} ${c.trait?.emoji}`,
     (c) => `Seven days straight! Look what I found: ${c.trait?.name} ${c.trait?.emoji}`,
-    (c) => `Full week done. ${c.trait?.emoji} New gear: ${c.trait?.name}!`,
+    (c) => `Seven in a row. ${c.trait?.emoji} New gear: ${c.trait?.name}!`,
   ],
   biggest: [
     'Your biggest day yet! Top roo.',

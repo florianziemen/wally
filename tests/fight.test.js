@@ -29,15 +29,31 @@ describe('fight', () => {
     assert.match(fightLine(s), /empty-pawed/);
   });
 
-  it('gains a trait for each full Monday-to-Sunday week', () => {
+  it('gains a trait for every seven days in a row', () => {
     const sun = addDays(MON, 6);
     assert.equal(fightState(daily(MON, 6), addDays(MON, 5)).traits.length, 0);
     const s = fightState(daily(MON, 7), sun);
     assert.deepEqual(s.traits, [TRAITS[0]]);
     assert.equal(s.last?.kind, 'gain');
     assert.match(fightLine(s), /Level 1 of 6/);
-    // Seven days that don't run Monday to Sunday earn nothing.
-    assert.equal(fightState(daily(addDays(MON, 1), 7), addDays(MON, 7)).traits.length, 0);
+    // Any start day works: Wednesday to Tuesday.
+    const wed = addDays(MON, 2);
+    const t = fightState(daily(wed, 7), addDays(wed, 6));
+    assert.deepEqual(t.traits, [TRAITS[0]]);
+    assert.deepEqual(t.last, { kind: 'gain', key: '2026-09-15', trait: TRAITS[0] });
+    // Fourteen in a row from Thursday earn two, on days 7 and 14.
+    assert.equal(fightState(daily(addDays(MON, 3), 13), addDays(MON, 15)).traits.length, 1);
+    assert.equal(fightState(daily(addDays(MON, 3), 14), addDays(MON, 16)).traits.length, 2);
+  });
+
+  it('starts the run over after a missed day', () => {
+    // Mon–Wed, miss Thu, Fri–Thu: the gain comes on day 7 of the new run.
+    const log = [...daily(MON, 3), ...daily(addDays(MON, 4), 7)];
+    const s = fightState(log, addDays(MON, 10));
+    assert.deepEqual(s.traits, [TRAITS[0]]);
+    assert.equal(s.last?.key, '2026-09-17');
+    // He turned zombie on Thursday, cured Friday, then six days aren't enough.
+    assert.equal(fightState(log.slice(0, -1), addDays(MON, 9)).traits.length, 0);
   });
 
   it('caps at the max level', () => {

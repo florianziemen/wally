@@ -259,9 +259,10 @@ Wally vs zombies (inspired by Zombicide)
 
 - `fightState(log, now)` replays the log day by day from the first workout.
   Nothing is stored; it is derived from the log every time.
-- Each Monday-to-Sunday week with exercise every day earns the next item
-  of `TRAITS` (🍳 🏏 🥾 🪖 🪓 🛡️), granted on the Sunday. `MAX_LEVEL`
-  equals `CALENDAR_WEEKS`: fully armed means every displayed week was full.
+- Every `RUN_DAYS` (7) days in a row with exercise earn the next item
+  of `TRAITS` (🍳 🏏 🥾 🪖 🪓 🛡️), on any weekday: granted on days 7,
+  14, 21, … of the run. A missed day resets the run. `MAX_LEVEL`
+  equals `CALENDAR_WEEKS`: fully armed takes at least 42 days of exercise.
 - Each past day without exercise costs the newest item. Today never counts
   as missed. A missed day with nothing left to lose turns Wally into a
   zombie; the next day with exercise cures him (no gear).

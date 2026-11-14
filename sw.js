@@ -1,7 +1,7 @@
 // Wally service worker: keeps the app usable offline.
 // Serves files from the cache first, then quietly fetches fresh copies,
 // so an update you upload appears on the next launch after it's fetched.
-const CACHE = 'wally-v4';
+const CACHE = 'wally-v5';
 const FILES = [
   './',
   './index.html',
